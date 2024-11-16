@@ -10,6 +10,12 @@ api_key = os.getenv("API_KEY")
 api_version = os.getenv("API_VERSION")
 model = os.getenv("MODEL")
 
+client = AzureOpenAI(
+    azure_endpoint=azure_endpoint,
+    api_key=api_key,
+    api_version=api_version,
+)
+
 st.title("Hyiuske")
 
 if "messages" not in st.session_state:
@@ -29,7 +35,7 @@ if prompt := st.chat_input("What is up?"):
         assistant_response_placeholder = st.empty()
 
         stream = client.chat.completions.create(
-            model="GPT-4Omni",
+            model=model,
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
