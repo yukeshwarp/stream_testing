@@ -10,16 +10,7 @@ api_key = os.getenv("API_KEY")
 api_version = os.getenv("API_VERSION")
 model = os.getenv("MODEL")
 
-client = AzureOpenAI(
-    azure_endpoint=azure_endpoint,
-    api_key=api_key,
-    api_version=api_version,
-)
-
-st.title("Stream completion testing")
-
-if "openai_model" not in st.session_state:
-    st.session_state["openai_model"] = model
+st.title("Hyiuske")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
@@ -34,13 +25,33 @@ if prompt := st.chat_input("What is up?"):
         st.markdown(prompt)
 
     with st.chat_message("assistant"):
-        stream = response = client.chat.completions.create(
-            model=model,
+        # Create a placeholder to update as tokens are streamed in
+        assistant_response_placeholder = st.empty()
+
+        stream = client.chat.completions.create(
+            model="GPT-4Omni",
             messages=[
                 {"role": m["role"], "content": m["content"]}
                 for m in st.session_state.messages
             ],
             stream=True,
         )
-        response = st.write_stream(stream)
-    st.session_state.messages.append({"role": "assistant", "content": response})
+
+        # Initialize a variable to collect the full response
+        full_response = ""
+
+        for chunk in stream:
+            print("Chunk received:", chunk)  # To understand the structure of the chunk
+            if chunk.choices and len(chunk.choices) > 0:
+                delta_content = chunk.choices[0].delta.content
+                print(
+                    "Delta content:", delta_content
+                )  # Check the content before concatenation
+                if delta_content is not None:
+                    full_response += delta_content
+                    assistant_response_placeholder.markdown(full_response)
+
+        # Append the final response to the session state
+        st.session_state.messages.append(
+            {"role": "assistant", "content": full_response}
+        )
