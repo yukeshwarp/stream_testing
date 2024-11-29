@@ -16,7 +16,7 @@ client = AzureOpenAI(
     api_version=api_version,
 )
 
-st.title("Hyiuske")
+st.title("AILA")
 
 if "messages" not in st.session_state:
     st.session_state.messages = []
